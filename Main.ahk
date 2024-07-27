@@ -2,6 +2,10 @@
 
 #SingleInstance Prompt
 #Include "%A_LineFile%"
-#Include Lib/GUI_TaskRunner.ahk
+#Include TaskRunner/GUI_TaskRunner.ahk
 
 F9::GuiTaskRunner().draw_gui()
+
+#HotIf WinActive("Task Runner")
+F9::Send("{Enter}")
+#HotIf

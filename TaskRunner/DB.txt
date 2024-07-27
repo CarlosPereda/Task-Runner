@@ -1,0 +1,10 @@
+University LMS,uni lms,10
+University MyInfo,uni myinfo,10
+Dir > Downloads,downloads,0
+Dir > My Documents,my documents,0
+Dir > Videos,videos,0
+Github,github,0
+Google Suite,google,0
+Spotify,spotify music,0
+Work Environment,work environment,0
+Outlook,outlook mail,-10

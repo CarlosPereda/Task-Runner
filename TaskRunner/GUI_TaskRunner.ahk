@@ -1,7 +1,7 @@
 ; ======================================================================================================================
 ; Program Name:     TaskRunner
 ; Author:           CarlosPeredaMieses
-; Tested with:      AHK 2.0-rc.1 (x64)
+; Tested with:      AHK 2.0.11 (x64)
 ; Tested on:        Win 10 Home (x64)
 ; Suggested Hotkey: The most accessible button you have / F8 / F9 / Four Taps on mousepad / special mouse button if any
 ; Notes:            The user should not write to the DB directly.
@@ -12,7 +12,7 @@
 ; ======================================================================================================================
 
 #Include "%A_LineFile%"
-#Include ../Include/Functions.ahk
+#Include Include/Functions.ahk
 
 BUTTONS := map(
     "delete", "Static1",
@@ -28,7 +28,7 @@ BUTTONS := map(
 
 Class GuiTaskRunner extends Gui{
     __New(){
-        super.__New("AlwaysOnTop", "New Task")
+        super.__New("AlwaysOnTop", "Task Runner")
         this.cd := RegExReplace(A_LineFile, "[^\\]*$", "")
         this.DB := this.cd . "DB.txt"
         this.task_map := map()
@@ -229,7 +229,7 @@ Class GuiTaskRunner extends Gui{
         task_selected := this.listview_control.GetNext(0, "Focused") ; stores the row number of the focused item
 
         if !task_selected {
-            MsgBox("You haven't selected an task", "New Task Error", 4112)
+            MsgBox("You haven't selected an task", "Task Runner Error", 4112)
             exit
         }
 
@@ -381,7 +381,7 @@ Class GuiTaskRunner extends Gui{
 
 Class GuiEditTask extends Gui{
     __New(OwnerHWND, new_entry, original_name, original_content, original_keywords, original_priority){
-        super.__New("-minimizeBox alwaysOnTop +owner" . OwnerHWND, "Edit New Task")
+        super.__New("-minimizeBox alwaysOnTop +owner" . OwnerHWND, "Edit Task")
         this.cd := RegExReplace(A_LineFile, "[^\\]*$", "")
         this.gui_owner := GuiFromHwnd(OwnerHWND)
         this.gui_owner_HWND := OwnerHWND
@@ -541,36 +541,36 @@ Class GuiEditTask extends Gui{
 }
 
 
-#HotIf WinActive("New Task",, "Edit")
+#HotIf WinActive("Task Runner",, "Edit")
 F8::Send("{Enter}")
 Esc::WinClose("A")
 
 Up::{
-    new_task_gui := GuiFromHwnd(WinExist("New Task"))
+    new_task_gui := GuiFromHwnd(WinExist("Task Runner"))
     PreviousPos  := new_task_gui.listview_control.GetNext()
     ChoicePos:=PreviousPos-1
 
     if (ChoicePos > 0)
-        return ControlSend("{Up}", "SysListview321", "New Task")
-    ControlSend("{End}", "SysListview321", "New Task")
+        return ControlSend("{Up}", "SysListview321", "Task Runner")
+    ControlSend("{End}", "SysListview321", "Task Runner")
 }
 
 Down::{
-    new_task_gui := GuiFromHwnd(WinExist("New Task"))
+    new_task_gui := GuiFromHwnd(WinExist("Task Runner"))
     PreviousPos  := new_task_gui.listview_control.GetNext()
     ItemsInList  := new_task_gui.listview_control.GetCount()
     ChoicePos:=PreviousPos+1
     if (ChoicePos <= ItemsInList)
-        return ControlSend("{Down}", "SysListview321", "New Task")
+        return ControlSend("{Down}", "SysListview321", "Task Runner")
 
-    ControlSend("{Home}", "SysListview321", "New Task")
+    ControlSend("{Home}", "SysListview321", "Task Runner")
 }
-^e::ControlClick(BUTTONS["edit"], "New Task",,"Left",1)
-Delete::ControlClick(BUTTONS["delete"], "New Task",,"Left",1)
-^n::ControlClick(BUTTONS["add"], "New Task",,"Left",1)
-F5::ControlClick(BUTTONS["refresh"], "New Task",,"Left",1)
+^e::ControlClick(BUTTONS["edit"], "Task Runner",,"Left",1)
+Delete::ControlClick(BUTTONS["delete"], "Task Runner",,"Left",1)
+^n::ControlClick(BUTTONS["add"], "Task Runner",,"Left",1)
+F5::ControlClick(BUTTONS["refresh"], "Task Runner",,"Left",1)
 ^o::{
-    new_task_gui := GuiFromHwnd(WinExist("New Task"))
+    new_task_gui := GuiFromHwnd(WinExist("Task Runner"))
     Run new_task_gui.cd . "\Unique Identifiers"
     if WinExist("DB.txt")
         WinClose
@@ -578,17 +578,17 @@ F5::ControlClick(BUTTONS["refresh"], "New Task",,"Left",1)
 }
 
 
-#HotIf WinActive("Edit New Task")
-^Enter::ControlClick(BUTTONS["save_close"], "Edit New Task",,"Left",1)
-^s::ControlClick(BUTTONS["save_continue"], "Edit New Task",,"Left",1)
-^o::ControlClick(BUTTONS["edit_in_default_editor"], "Edit New Task",,"Left",1)
+#HotIf WinActive("Edit Task")
+^Enter::ControlClick(BUTTONS["save_close"], "Edit Task",,"Left",1)
+^s::ControlClick(BUTTONS["save_continue"], "Edit Task",,"Left",1)
+^o::ControlClick(BUTTONS["edit_in_default_editor"], "Edit Task",,"Left",1)
 Esc::WinClose("A")
 #HotIf
 
 ^5::{
-    if WinExist("New Task"){
+    if WinExist("Task Runner"){
        return 
     }
     GuiTaskRunner().draw_gui()
-    ControlClick(BUTTONS["add"], "New Task",,"Left",1)
+    ControlClick(BUTTONS["add"], "Task Runner",,"Left",1)
 }
