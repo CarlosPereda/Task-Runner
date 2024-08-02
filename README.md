@@ -8,11 +8,10 @@
   <p align="center">
     Task Runner is a graphical application built with  AutoHotKey (AHK) <br/> that simplifies automating daily and repetitive tasks.
     <br />
-    <!--     <a href="https://github.com/github_username/repo_name">View Demo</a> -->
     ·
-    <a href="https://github.com/github_username/repo_name/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    <a href="https://github.com/CarlosPereda/Task-Runner/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="https://github.com/CarlosPereda/Task-Runner/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
 
