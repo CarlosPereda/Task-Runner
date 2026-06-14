@@ -1,5 +1,7 @@
 <a id="readme-top"></a>
 
+[![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/CarlosPereda/Task-Runner/blob/main/README.es.md) (link a la version en español)
+
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
