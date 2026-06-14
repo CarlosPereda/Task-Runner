@@ -79,12 +79,12 @@ You need to have any version of AHKv2 installed to your computer. To use this so
 
 ### Installation
 
-1. Just clone or download the repository
+- #### Option 1: Just clone or download the repository
    ```sh
    git clone https://github.com/CarlosPereda/Task-Runner
    ```
 
-2. Alternatively, you can include GUI_TaskRunner.ahk to an existing ahk script that you are already using. Copying the hotkeys behaviour from Main.ahk is advisable.
+- #### Option 2: Alternatively, you can include GUI_TaskRunner.ahk to an existing ahk script that you are already using. Copying the hotkeys behaviour from Main.ahk is advisable.
    ```js
    #Include Your/Path/TaskRunner/GUI_TaskRunner.ahk
 
@@ -103,7 +103,7 @@ You need to have any version of AHKv2 installed to your computer. To use this so
 1. Execute Main.ahk 
 2. Press ```F9``` on your Keyboard to open the Task Runner GUI
 3. Type SPACE to see all available tasks or search for a specific task
-4. Select a task to run it (You can run it with ```F9```)
+4. Select a task to run it (You can run it with double click, ```F9``` or ```Enter```)
 
 ### Create a new task
 1. In the Task Runner GUI, click the Plus button or press ```Ctrl+N``` 
@@ -129,9 +129,5 @@ You need to have any version of AHKv2 installed to your computer. To use this so
 ## Roadmap
 
 - [ ] Add Icon/Logo
-- [ ] Document PreConditions and PostConditions in the code 
-- [ ] Document internal functionality
-- [ ] Add a licence
-- [ ] Test in Windows 11
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
