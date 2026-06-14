@@ -99,7 +99,7 @@ Necesitas tener instalada cualquier versión de AHKv2 en tu ordenador. Para usar
 ## Uso
 
 ### Ejecutar una tarea
-1. Ejecuta Main.ahk (mira requisitos previos
+1. Ejecuta Main.ahk (mira <a href="#requisitos-previos">Requisitos previos</a>)
 2. Pulsa ```F9``` en tu teclado para abrir la interfaz de Task Runner
 3. Pulsa ```ESPACIO``` para ver todas las tareas disponibles o escribe una tarea específica
 4. Selecciona una tarea para ejecutarla (puedes ejecutarla con doble clic, ```F9``` o ```Enter```)
