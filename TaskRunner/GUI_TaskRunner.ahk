@@ -16,7 +16,6 @@ Class NT_Utils{
         file_content := FileRead(file)
 
         new_file_content := RegExReplace(file_content, expression, replacement)
-        ; MsgBox(expression)
         FileAppend(new_file_content, "outputfile.txt")
         FileMove("outputfile.txt", file, 1)
     }
@@ -56,6 +55,7 @@ Class TaskRunner extends Gui{
         this.cd := RegExReplace(A_LineFile, "[^\\]*$", "") ; Current directory
         this.DB := this.cd . "DB.txt"
         this.task_map := map()
+        this.delete_empty_rows_from_db()  
     }
 
 
@@ -283,7 +283,7 @@ Class TaskRunner extends Gui{
         this.add_missing_identifiers_to_DB()
         this.sort_DB_priority_alphabetically()
 
-        this.remove_missing_tasks_from_DB()
+        this._missing_tasks_from_DB()
 
         this.delete_empty_rows_from_db()        
         this.fill_listview()
@@ -331,7 +331,7 @@ Class TaskRunner extends Gui{
     }
 
 
-    remove_missing_tasks_from_DB(){
+    _missing_tasks_from_DB(){
         all_unique_identifiers := ""
         Loop Files, this.cd . "Unique Identifiers\*.ahk"{
             new_identifier := RegExReplace(A_LoopFileName, ".ahk", "")
@@ -359,7 +359,6 @@ Class TaskRunner extends Gui{
 
     binary_search(target_name, target_priority){
         DB_content := FileRead(this.DB)
-        ; MsgBox(DB_content)
         DB_content := StrLower(DB_content)
         str_array := StrSplit(DB_content, "`n")
         
@@ -372,7 +371,6 @@ Class TaskRunner extends Gui{
             RegExMatch(str_array[middle], "(^[^,]*)", &middle_name)
             RegExMatch(str_array[middle], "([^,]*)$", &middle_priority)
             
-            ; MsgBox(target_name . "===" . middle_name[])
             if target_name == middle_name[]{
                 return middle
             } else {
@@ -524,8 +522,6 @@ Class GuiEditTask extends Gui{
             old_task_str := this.original_name "," this.original_keywords "," . this.original_priority
             old_task_str := RegExReplace(old_task_str, "(\[|\]|\(|\)|\{|\})", "\$1")                        ; Cant remember what this is for
             old_task_str := "m)^" . old_task_str . "$"                                               ; Capture the complete item only if it matches a complete line
-            ; MsgBox("old_task_str: " . old_task_str)
-            ; MsgBox(new_task_string)
             NT_Utils.TextFile_RegExReplace(this.gui_owner.DB, old_task_str, new_task_string)
 
             old_unique_identifier := RegExReplace(this.original_name, "[^\p{L}\d]", "")
@@ -534,7 +530,6 @@ Class GuiEditTask extends Gui{
         }
         unique_identifier := RegExReplace(gui_saved.EditedName , "[^\p{L}\d]", "")
         unique_identifier_path := this.cd . "Unique Identifiers\" unique_identifier ".ahk"
-        ; MsgBox(unique_identifier_path)
         FileAppend gui_saved.EditedContent, unique_identifier_path ; Creates a new ahk file with new Action and name.
     }
 
