@@ -21,3 +21,9 @@ On Edit New Task Window
 Ctrl-O          Save and edit in other window
 Ctrl-S          Save and continue editing
 Ctrl-Enter      Save and close
+
+-----------------------------------------------
+
+Outside the program:
+
+Ctrl-5          Create new task
