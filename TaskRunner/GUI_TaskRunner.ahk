@@ -11,8 +11,32 @@
 ; In no event will the authors be held liable for any damages arising from the use of this software.
 ; ======================================================================================================================
 
-#Include "%A_LineFile%"
-#Include Include/Functions.ahk
+Class NT_Utils{
+    static TextFile_RegExReplace(file, expression, replacement){
+        file_content := FileRead(file)
+
+        new_file_content := RegExReplace(file_content, expression, replacement)
+        ; MsgBox(expression)
+        FileAppend(new_file_content, "outputfile.txt")
+        FileMove("outputfile.txt", file, 1)
+    }
+
+    static get_highlighted_text(){
+        Sleep(500)
+       	ClipboardOld := A_Clipboard 
+        A_Clipboard  := ""
+
+        Send("{Ctrl down}c{Ctrl up}")
+        if !ClipWait(0.08)
+            selected := ""
+        else
+            selected := A_Clipboard
+
+        A_Clipboard := ClipboardOld
+        return selected
+    }
+}
+
 
 BUTTONS := map(
     "delete", "Static1",
@@ -26,10 +50,10 @@ BUTTONS := map(
     "edit_in_default_editor", "Button4"
 )
 
-Class GuiTaskRunner extends Gui{
+Class GuiNewTask extends Gui{
     __New(){
-        super.__New("AlwaysOnTop", "Task Runner")
-        this.cd := RegExReplace(A_LineFile, "[^\\]*$", "")
+        super.__New("AlwaysOnTop", "New Task")
+        this.cd := RegExReplace(A_LineFile, "[^\\]*$", "") ; Current directory
         this.DB := this.cd . "DB.txt"
         this.task_map := map()
     }
@@ -80,10 +104,8 @@ Class GuiTaskRunner extends Gui{
             return
 
         DB_content := FileRead(this.DB)
-        
         Loop Parse, DB_content, "`n", "`r" {
             RegExMatch(A_LoopField, "(.*),(.*),(.*)", &parsed_task)
-        
             task_name := parsed_task[1]
             task_keywords := parsed_task[2]
             task_priority := parsed_task[3]
@@ -124,7 +146,6 @@ Class GuiTaskRunner extends Gui{
                 FileAppend(A_LoopReadLine . "`n")
             }
         }
-        FileAppend("", "OutputFile.txt") ; This line ensures the file OutputFile exists
 
         FileMove("OutputFile.txt", this.DB, 1)
         FileDelete(this.task_map["unique_identifier_path"])
@@ -147,7 +168,7 @@ Class GuiTaskRunner extends Gui{
         this.task_map := this.get_focused_row_data()
         this.opt("Disabled")
         GuiEditTask(this.HWND,
-            new_entry,
+            new_entry, 
             this.task_map["original_name"],
             this.task_map["original_content"],
             this.task_map["original_keywords"],
@@ -176,14 +197,18 @@ Class GuiTaskRunner extends Gui{
             original_priority
         ).draw_gui()
 
-        
+
         get_current_application(){
-            sleep(10)
+            sleep(100)
             explorerHwnd := WinActive("ahk_class CabinetWClass")
-            if WinActive("ahk_exe chrome.exe") || WinActive("ahk_exe msedge.exe") || 
-                WinActive("ahk_exe firefox.exe") || WinActive("ahk_exe opera.exe"){
+            if WinActive("ahk_exe firefox.exe") || WinActive("ahk_exe chrome.exe") || WinActive("ahk_exe msedge.exe"){
+            ; if WinActive("ahk_exe (firefox|chrome|msedge).exe") {
+                
                 Send("^l")
-                CurrentApplication := get_highlighted_text()
+                CurrentApplication := NT_Utils.get_highlighted_text()
+                
+                CurrentApplication := "`'" . CurrentApplication . "`'"
+                return CurrentApplication
 
             ; Thanks to AlexV for the next part of the code
             ; https://www.autohotkey.com/boards/viewtopic.php?t=69925
@@ -202,9 +227,13 @@ Class GuiTaskRunner extends Gui{
                 CurrentApplication := process.CommandLine
             }
 
-
             CurrentApplication := RegExReplace(CurrentApplication, "`"", "")
-            CurrentApplication := RegExReplace(CurrentApplication, "(?=\w:\\)", "`"")
+
+            ; Place double quotes between a directory path
+            CurrentApplication := RegExReplace(CurrentApplication, "((?=\w:\\).*)", "$1`"")
+            
+            CurrentApplication := RegExReplace(CurrentApplication, "(?=\w:\\)", "`"") 
+            
             CurrentApplication := RegExReplace(CurrentApplication, "(\.\w+)(\s|$)", "$1`"$2")
             CurrentApplication := "`'" . CurrentApplication . "`'"
 
@@ -229,14 +258,14 @@ Class GuiTaskRunner extends Gui{
         task_selected := this.listview_control.GetNext(0, "Focused") ; stores the row number of the focused item
 
         if !task_selected {
-            MsgBox("You haven't selected an task", "Task Runner Error", 4112)
+            MsgBox("You haven't selected an task", "New Task Error", 4112)
             exit
         }
 
         original_name           := this.listview_control.GetText(task_selected, 1) ; Retrieves the text at the task_selected row and column 1
         original_keywords       := this.listview_control.GetText(task_selected, 2) ; Retrieves the text at the task_selected row and column 2
         original_priority       := this.listview_control.GetText(task_selected, 3) ; Retrieves the text at the task_selected row and column 3
-        unique_identifier       := RegExReplace(original_name, "[^a-zA-Z\d]", "") ; all non alphanumeric characters are deleted to get the unique_identifier
+        unique_identifier       := RegExReplace(original_name, "[^\p{L}\d]", "") ; all non alphanumeric characters are deleted to get the unique_identifier
         unique_identifier_path  := this.cd . "Unique Identifiers\" . unique_identifier . ".ahk"
         original_content        := FileRead(unique_identifier_path)
 
@@ -263,7 +292,7 @@ Class GuiTaskRunner extends Gui{
 
     add_missing_identifiers_to_DB(){
         DB_content := FileRead(this.DB)
-        DB_content := RegExReplace(DB_content, "[^a-zA-Z\d,\n]", "")  ; Delete all non alpha numeric characters from DB
+        DB_content := RegExReplace(DB_content, "[^\p{L}\d,\n]", "")  ; Delete all non alpha numeric characters from DB
 
         tasks_extension := ""
         Loop Files, this.cd . "Unique Identifiers\*.ahk"{
@@ -311,7 +340,7 @@ Class GuiTaskRunner extends Gui{
 
         Loop Read this.DB, "OutputFile.txt" {
             RegExMatch(A_LoopReadLine, "^([^,]*)", &listview_name)
-            unique_identifier := RegExReplace(listview_name[], "[^a-zA-Z\d]", "")
+            unique_identifier := RegExReplace(listview_name[], "[^\p{L}\d]", "")
             If (inStr(all_unique_identifiers, unique_identifier, False)) {
                 FileAppend(A_LoopReadLine . "`n")
             }
@@ -322,14 +351,15 @@ Class GuiTaskRunner extends Gui{
 
 
     delete_empty_rows_from_db(){
-        TextFile_RegExReplace(this.DB, "\n(?=\n)", "")
-        TextFile_RegExReplace(this.DB, "^\n", "")
-        TextFile_RegExReplace(this.DB, "\n$", "")
+        NT_Utils.TextFile_RegExReplace(this.DB, "\n(?=\n)", "")
+        NT_Utils.TextFile_RegExReplace(this.DB, "^\n", "")
+        NT_Utils.TextFile_RegExReplace(this.DB, "\n$", "")
     }
     
 
     binary_search(target_name, target_priority){
         DB_content := FileRead(this.DB)
+        ; MsgBox(DB_content)
         DB_content := StrLower(DB_content)
         str_array := StrSplit(DB_content, "`n")
         
@@ -342,6 +372,7 @@ Class GuiTaskRunner extends Gui{
             RegExMatch(str_array[middle], "(^[^,]*)", &middle_name)
             RegExMatch(str_array[middle], "([^,]*)$", &middle_priority)
             
+            ; MsgBox(target_name . "===" . middle_name[])
             if target_name == middle_name[]{
                 return middle
             } else {
@@ -381,7 +412,7 @@ Class GuiTaskRunner extends Gui{
 
 Class GuiEditTask extends Gui{
     __New(OwnerHWND, new_entry, original_name, original_content, original_keywords, original_priority){
-        super.__New("-minimizeBox alwaysOnTop +owner" . OwnerHWND, "Edit Task")
+        super.__New("-minimizeBox alwaysOnTop +owner" . OwnerHWND, "Edit New Task")
         this.cd := RegExReplace(A_LineFile, "[^\\]*$", "")
         this.gui_owner := GuiFromHwnd(OwnerHWND)
         this.gui_owner_HWND := OwnerHWND
@@ -455,9 +486,9 @@ Class GuiEditTask extends Gui{
 
         this.gui_owner.sort_DB_priority_alphabetically()
         this.gui_owner.search_control.value := " "
-        this.gui_owner.delete_empty_rows_from_db()
         this.gui_owner.fill_listview()
-        
+
+        this.gui_owner.click_refresh_button()
         row_index := this.gui_owner.binary_search(Saved.EditedName, Saved.EditPriority)
         this.gui_owner.listview_control.modify(row_index, "Vis Focus Select")
 
@@ -491,17 +522,19 @@ Class GuiEditTask extends Gui{
             FileAppend("`n" new_task_string, this.gui_owner.DB) ; Add entry to DB
         } else {
             old_task_str := this.original_name "," this.original_keywords "," . this.original_priority
-            old_task_str := RegExReplace(old_task_str, "(\[|\]|\(|\)|\{|\})", "\$1")
-            old_task_str := "m)^\b" . old_task_str . "*\b,*$" ; Capture the complete item only if it matches a complete line
-            TextFile_RegExReplace(this.gui_owner.DB, old_task_str, new_task_string)
+            old_task_str := RegExReplace(old_task_str, "(\[|\]|\(|\)|\{|\})", "\$1")                        ; Cant remember what this is for
+            old_task_str := "m)^" . old_task_str . "$"                                               ; Capture the complete item only if it matches a complete line
+            ; MsgBox("old_task_str: " . old_task_str)
+            ; MsgBox(new_task_string)
+            NT_Utils.TextFile_RegExReplace(this.gui_owner.DB, old_task_str, new_task_string)
 
-            old_unique_identifier := RegExReplace(this.original_name, "[^a-zA-Z\d]", "")
+            old_unique_identifier := RegExReplace(this.original_name, "[^\p{L}\d]", "")
             old_unique_identifier_path := this.cd . "Unique Identifiers\" old_unique_identifier ".ahk"
             FileDelete(old_unique_identifier_path)
         }
-
-        unique_identifier := RegExReplace(gui_saved.EditedName , "[^a-zA-Z\d]", "")
+        unique_identifier := RegExReplace(gui_saved.EditedName , "[^\p{L}\d]", "")
         unique_identifier_path := this.cd . "Unique Identifiers\" unique_identifier ".ahk"
+        ; MsgBox(unique_identifier_path)
         FileAppend gui_saved.EditedContent, unique_identifier_path ; Creates a new ahk file with new Action and name.
     }
 
@@ -519,14 +552,14 @@ Class GuiEditTask extends Gui{
 
 
     assert_saving_task(gui_saved){
-        Newunique_identifier := RegExReplace(gui_saved.EditedName, "[^a-zA-Z\d]", "")
+        Newunique_identifier := RegExReplace(gui_saved.EditedName, "[^\p{L}\d]", "")
         if Newunique_identifier == ""{
             return MsgBox("The unique_identifier name cannot be empty","Error Saving Item", 4112)
         }
 
-        original_name := RegExReplace(this.original_name, "[^a-zA-Z\d]", "") ; all non alphanumeric characters are deleted to get the unique_identifier
+        original_name := RegExReplace(this.original_name, "[^\p{L}\d]", "") ; all non alphanumeric characters are deleted to get the unique_identifier
         DB_content := FileRead(this.gui_owner.DB)
-        DB_content := RegExReplace(DB_content, "[^a-zA-Z\d,\n]", "")
+        DB_content := RegExReplace(DB_content, "[^\p{L}\d,\n]", "")
         if (RegExMatch(DB_content, "mi)^" . Newunique_identifier . "," ) and original_name != Newunique_identifier)
             return MsgBox("The new configuration couldn't save because unique_identifier ('" Newunique_identifier "') " .
                           "already exist.`n`nChoose another name or change existing item name instead.",
@@ -541,36 +574,37 @@ Class GuiEditTask extends Gui{
 }
 
 
-#HotIf WinActive("Task Runner",, "Edit")
-F8::Send("{Enter}")
+#HotIf WinActive("New Task",, "Edit") ; Exclude Edit
+F9::Send("{Enter}")
 Esc::WinClose("A")
+^w::WinClose("A")
 
 Up::{
-    new_task_gui := GuiFromHwnd(WinExist("Task Runner"))
+    new_task_gui := GuiFromHwnd(WinExist("New Task"))
     PreviousPos  := new_task_gui.listview_control.GetNext()
     ChoicePos:=PreviousPos-1
 
     if (ChoicePos > 0)
-        return ControlSend("{Up}", "SysListview321", "Task Runner")
-    ControlSend("{End}", "SysListview321", "Task Runner")
+        return ControlSend("{Up}", "SysListview321", "New Task")
+    ControlSend("{End}", "SysListview321", "New Task")
 }
 
 Down::{
-    new_task_gui := GuiFromHwnd(WinExist("Task Runner"))
+    new_task_gui := GuiFromHwnd(WinExist("New Task"))
     PreviousPos  := new_task_gui.listview_control.GetNext()
     ItemsInList  := new_task_gui.listview_control.GetCount()
     ChoicePos:=PreviousPos+1
     if (ChoicePos <= ItemsInList)
-        return ControlSend("{Down}", "SysListview321", "Task Runner")
+        return ControlSend("{Down}", "SysListview321", "New Task")
 
-    ControlSend("{Home}", "SysListview321", "Task Runner")
+    ControlSend("{Home}", "SysListview321", "New Task")
 }
-^e::ControlClick(BUTTONS["edit"], "Task Runner",,"Left",1)
-Delete::ControlClick(BUTTONS["delete"], "Task Runner",,"Left",1)
-^n::ControlClick(BUTTONS["add"], "Task Runner",,"Left",1)
-F5::ControlClick(BUTTONS["refresh"], "Task Runner",,"Left",1)
+^e::ControlClick(BUTTONS["edit"], "New Task",,"Left",1)
+Delete::ControlClick(BUTTONS["delete"], "New Task",,"Left",1)
+^n::ControlClick(BUTTONS["add"], "New Task",,"Left",1)
+F5::ControlClick(BUTTONS["refresh"], "New Task",,"Left",1)    ; apparently not used
 ^o::{
-    new_task_gui := GuiFromHwnd(WinExist("Task Runner"))
+    new_task_gui := GuiFromHwnd(WinExist("New Task"))
     Run new_task_gui.cd . "\Unique Identifiers"
     if WinExist("DB.txt")
         WinClose
@@ -578,17 +612,18 @@ F5::ControlClick(BUTTONS["refresh"], "Task Runner",,"Left",1)
 }
 
 
-#HotIf WinActive("Edit Task")
-^Enter::ControlClick(BUTTONS["save_close"], "Edit Task",,"Left",1)
-^s::ControlClick(BUTTONS["save_continue"], "Edit Task",,"Left",1)
-^o::ControlClick(BUTTONS["edit_in_default_editor"], "Edit Task",,"Left",1)
+#HotIf WinActive("Edit New Task")
+^Enter::ControlClick(BUTTONS["save_close"], "Edit New Task",,"Left",1)
+^s::ControlClick(BUTTONS["save_continue"], "Edit New Task",,"Left",1)
+^o::ControlClick(BUTTONS["edit_in_default_editor"], "Edit New Task",,"Left",1)
 Esc::WinClose("A")
+^w::WinClose("A")
 #HotIf
 
 ^5::{
-    if WinExist("Task Runner"){
+    if WinExist("New Task"){
        return 
     }
-    GuiTaskRunner().draw_gui()
-    ControlClick(BUTTONS["add"], "Task Runner",,"Left",1)
+    GuiNewTask().draw_gui()
+    ControlClick(BUTTONS["add"], "New Task",,"Left",1)
 }
