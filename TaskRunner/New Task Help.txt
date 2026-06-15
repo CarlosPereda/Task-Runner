@@ -1,0 +1,23 @@
+Main and Edit Windows
+
+Ctrl-W          Close Window
+Esc             Close Window
+
+-----------------------------------------------
+
+On New Task Main Window
+
+Up              Focus previous entry
+Down            Focus next entry
+Ctrl-N          Create new entry
+Ctrl-E          Edit Focused Entry
+Ctrl-O          Open DataBase.txt
+Delete          Delete Entry
+
+-----------------------------------------------
+
+On Edit New Task Window
+
+Ctrl-O          Save and edit in other window
+Ctrl-S          Save and continue editing
+Ctrl-Enter      Save and close
