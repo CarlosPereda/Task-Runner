@@ -1,0 +1,1 @@
+run('ms-settings:appsfeatures')
