@@ -1,1 +1,0 @@
-run("C:\Users\" A_UserName "\AppData\Roaming\Spotify\Spotify.exe")
