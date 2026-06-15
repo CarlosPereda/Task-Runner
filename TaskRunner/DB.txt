@@ -1,10 +1,15 @@
-University LMS,uni lms,10
-University MyInfo,uni myinfo,10
-Dir > Downloads,downloads,0
-Dir > My Documents,my documents,0
-Dir > Videos,videos,0
-Github,github,0
-Google Suite,google,0
-Spotify,spotify music,0
-Work Environment,work environment,0
-Outlook,outlook mail,-10
+Config > Add or remove programs,quitar agregar programas add or remove programs,0
+Config > Device Manager,device manager administrador de dispositivos,0
+Config > Panel Control,panel control,0
+Config > Sound,sonido sound configuration,0
+Dir > Downloads,descargas downloads directory,0
+Dir > Images,dir images screenshots imagenes capturas,0
+Dir > My Documents,directory my documents,0
+Dir > Videos,directory videos,0
+Drive,google drive,0
+Gmail,gmail email,0
+Google Suite,gsuite google suite drive calendar gmail,0
+Recycle Bin,recicle bin papelera reciclaje,0
+Word,word,0
+Youtube,youtube yt,0
+Outlook,email outlook microsoft,-5
