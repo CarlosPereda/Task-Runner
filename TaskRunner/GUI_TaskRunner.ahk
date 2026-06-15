@@ -49,7 +49,7 @@ BUTTONS := map(
     "edit_in_default_editor", "Button4"
 )
 
-Class TaskRunner extends Gui{
+Class GuiTaskRunner extends Gui{
     __New(){
         super.__New("AlwaysOnTop", "New Task")
         this.cd := RegExReplace(A_LineFile, "[^\\]*$", "") ; Current directory
@@ -619,6 +619,6 @@ Esc::WinClose("A")
     if WinExist("New Task"){
        return 
     }
-    TaskRunner().draw_gui()
+    GuiTaskRunner().draw_gui()
     ControlClick(BUTTONS["add"], "New Task",,"Left",1)
 }
